@@ -29,6 +29,11 @@ public class UserService {
         return userEntityRepository.findByLogin(login);
     }
 
+    public UserEntity findByActivationCode(String activationCode) {
+        UserEntity userWithThatCode = userEntityRepository.findByActivationCode((activationCode));
+        return userWithThatCode;
+    }
+
     public UserEntity findByLoginAndPassword(String login, String password) {
         UserEntity userEntity = findByLogin(login);
         if (userEntity != null) {
@@ -37,5 +42,19 @@ public class UserService {
             }
         }
         return null;
+    }
+
+    public boolean activateUser(String code) {
+        UserEntity user = userEntityRepository.findByActivationCode(code);
+
+        if(user == null)
+        {
+            return false;
+        }
+
+        user.setActivationCode(null);
+        userEntityRepository.save(user);
+
+        return true;
     }
 }

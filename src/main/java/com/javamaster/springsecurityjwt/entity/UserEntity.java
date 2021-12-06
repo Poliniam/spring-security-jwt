@@ -26,8 +26,27 @@ public class UserEntity {
     @Column
     private String password;
 
+    public void setActivationCode(String activationCode) {
+        this.activationCode = activationCode;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
     @Column
     private String email;
+
+    @Column
+    private String activationCode;
+
+    public String getActivationCode() {
+        return activationCode;
+    }
 
     @ManyToOne
     @JoinColumn(name = "role_id")
