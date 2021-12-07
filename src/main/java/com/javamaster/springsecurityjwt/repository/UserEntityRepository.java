@@ -9,4 +9,6 @@ public interface UserEntityRepository extends JpaRepository<UserEntity, Integer>
 
     UserEntity findByActivationCode(String code);
 
+    UserEntity findById(int id);
+
 }

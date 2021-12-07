@@ -44,6 +44,9 @@ public class UserEntity {
     @Column
     private String activationCode;
 
+    @Column
+    private Boolean status;
+
     public String getActivationCode() {
         return activationCode;
     }
@@ -51,4 +54,5 @@ public class UserEntity {
     @ManyToOne
     @JoinColumn(name = "role_id")
     private RoleEntity roleEntity;
+
 }
