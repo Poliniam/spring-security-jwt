@@ -48,7 +48,7 @@ public class AuthController {
     public AuthResponse auth(@RequestBody AuthRequest request) {
         CurrentUser currentUser = new CurrentUser();
             UserEntity userEntity = userService.findByLoginAndPassword(request.getLogin(), request.getPassword());
-            if(userEntity.getStatus() == false){
+            if(userEntity.getStatus().equals(false)){
                 System.out.println("You can't");
             }
             else {
@@ -66,7 +66,7 @@ public class AuthController {
         UserEntity user = userService.findByActivationCode(hash_code);
        if(user != null){
            user.setStatus(true);
-           userService.saveUser(user);
+           userService.saveUserOnceMore(user);
            return "Okay, we can register you. Now, you should do an authorization";
        }
        else {

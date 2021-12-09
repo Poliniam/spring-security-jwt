@@ -25,6 +25,10 @@ public class UserService {
         return userEntityRepository.save(userEntity);
     }
 
+    public UserEntity saveUserOnceMore (UserEntity userEntity){
+        return userEntityRepository.save(userEntity);
+    }
+
     public UserEntity findById(int id){
         UserEntity user = userEntityRepository.findById(id);
         return user;
