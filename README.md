@@ -4,4 +4,4 @@ reviews that everyone offers, while reviews are thorough
 verification by trusted persons. The overall top is based on these ratings.
 traders in a particular category of games.
 
-##How to use this app:
+## How to use this app:
