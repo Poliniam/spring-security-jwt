@@ -77,7 +77,7 @@ public class CommentController {
         return null;
     }
 
-    @DeleteMapping("/users/{id}/comments/{idComm}")
+    @DeleteMapping("/admin/users/{id}/comments/{idComm}")
     public CommentEntity deleteOneComment(@PathVariable Integer id, @PathVariable Integer idComm){
         CommentEntity comment = getOneTraderComment(id, idComm);
         if(comment!= null){

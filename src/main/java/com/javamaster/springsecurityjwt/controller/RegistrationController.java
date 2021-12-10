@@ -12,7 +12,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.io.FileInputStream;
 import java.util.UUID;
+import java.util.logging.Level;
+import java.util.logging.LogManager;
+import java.util.logging.Logger;
 
 @RestController
 public class RegistrationController {
@@ -24,7 +28,15 @@ public class RegistrationController {
     @Autowired
     private MailSender mailSender;
 
-    java.util.logging.Logger log = java.util.logging.Logger.getLogger(GameController.class.getName());
+    static Logger LOGGER;
+    static {
+        try(FileInputStream ins = new FileInputStream("D:\\spring-security-jwt-master\\src\\main\\resources\\log.config")){
+            LogManager.getLogManager().readConfiguration(ins);
+            LOGGER = Logger.getLogger(RegistrationController.class.getName());
+        }catch (Exception ignore){
+            ignore.printStackTrace();
+        }
+    }
 
     @PostMapping("/register")
     public String registerUser(@RequestBody @Valid RegistrationRequest registrationRequest) throws UserException {
@@ -44,6 +56,8 @@ public class RegistrationController {
                         u.getActivationCode());
 
                 mailSender.send(u.getEmail(), "Activation code", message);
+
+                LOGGER.log(Level.INFO,"The activation code was sent to user");
                 return "Successful registration! Check you mail we send you activation code";
             }
             else throw new UserException("Password mismatch");
@@ -63,6 +77,7 @@ public class RegistrationController {
                 currentUser.setIdOfCurrentUser(userEntity.getId());
                 currentUser.setRoleOfCurrentUser(role.getName());
                 String token = jwtProvider.generateToken(userEntity.getLogin());
+                LOGGER.log(Level.INFO,"The user was authenticated");
                 return new AuthResponse(token);
             }
         }
@@ -75,6 +90,7 @@ public class RegistrationController {
         if(user != null){
             user.setStatus(true);
             userService.saveUserOnceMore(user);
+            LOGGER.log(Level.INFO,"The activation code was approved");
             return "Okay, we can register you. Now, you should do an authorization.";
         }
         else throw new UserException("Incorrect activation code. Register again");

@@ -7,8 +7,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.io.FileInputStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.LogManager;
+import java.util.logging.Logger;
 
 @RestController
 public class GameController {
@@ -16,7 +20,15 @@ public class GameController {
     @Autowired
     private GameService gameService;
 
-    java.util.logging.Logger log = java.util.logging.Logger.getLogger(GameController.class.getName());
+    static Logger LOGGER;
+    static {
+        try(FileInputStream ins = new FileInputStream("D:\\spring-security-jwt-master\\src\\main\\resources\\log.config")){
+            LogManager.getLogManager().readConfiguration(ins);
+            LOGGER = Logger.getLogger(GameController.class.getName());
+        }catch (Exception ignore){
+            ignore.printStackTrace();
+        }
+    }
 
     @GetMapping("/games")
     public List<GameEntity> getAllGames() throws UserException {
@@ -33,7 +45,7 @@ public class GameController {
             GameEntity game = new GameEntity();
                 game.setGameName(newGame.getGameName());
                 gameService.saveGame(game);
-                log.info("New game added");
+                LOGGER.log(Level.INFO,"New game added");
                 return "New game added";
     }
 
@@ -44,7 +56,7 @@ public class GameController {
                 game.setId(id);
                 game.setGameName(newGame.getGameName());
                 gameService.saveUpdatedGame(game);
-                log.info("The game edited");
+                LOGGER.log(Level.INFO,"The game edited");
                 return "The game edited";
             } else throw new UserException("There is no game with such id");
     }

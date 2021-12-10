@@ -13,9 +13,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.io.FileInputStream;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.LogManager;
+import java.util.logging.Logger;
 
 @RestController
 public class GameObjectController {
@@ -28,8 +32,16 @@ public class GameObjectController {
     private CommentService commentService;
     @Autowired
     private UserService userService;
+    static Logger LOGGER;
+    static {
+        try(FileInputStream ins = new FileInputStream("D:\\spring-security-jwt-master\\src\\main\\resources\\log.config")){
+            LogManager.getLogManager().readConfiguration(ins);
+            LOGGER = Logger.getLogger(GameObjectController.class.getName());
+        }catch (Exception ignore){
+            ignore.printStackTrace();
+        }
+    }
 
-    java.util.logging.Logger log = java.util.logging.Logger.getLogger(GameController.class.getName());
 
     @PostMapping("/user/object")
     public String createGameObject(@RequestBody @Valid NewForm gameObject) throws UserException {
@@ -47,7 +59,7 @@ public class GameObjectController {
                         GameEntity game = (gameService.findByGameName(gameObject.getGameName()));
                         gameOb.setGame_id(game);
                         gameObjectService.saveRequest(gameOb);
-                        log.info("New game object added");
+                        LOGGER.log(Level.INFO,"New game object added");
                         return "New game object added";
                     } else throw new UserException("Such game object already exists");
                 } else throw new UserException("Write all data, please");
@@ -86,7 +98,7 @@ public class GameObjectController {
         else throw new UserException ("There is no such game object");
     }
 
-    @DeleteMapping("/object/{id}")
+    @DeleteMapping("/user/object/{id}")
     public String deleteTheGameObject(@PathVariable Integer id) throws UserException {
         if (CurrentUser.getIdOfCurrentUser() != null) {
             GameObjectEntity theGameObject = gameObjectService.findById(id);
@@ -119,7 +131,8 @@ public class GameObjectController {
                         gameObject.setTitle(newGameObject.getTitle());
                         gameObject.setText(newGameObject.getText());
                         gameObjectService.saveRequest(gameObject);
-                        log.info("The game object edited");
+
+                        LOGGER.log(Level.INFO,"The game object edited");
                         return "The game object edited";
                     }
                     else throw new UserException("There is no such game object");
