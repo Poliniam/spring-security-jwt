@@ -1,14 +1,13 @@
 package com.javamaster.springsecurityjwt.service;
 
-import com.javamaster.springsecurityjwt.entity.CommentEntity;
 import com.javamaster.springsecurityjwt.entity.GameObjectEntity;
 import com.javamaster.springsecurityjwt.entity.UserEntity;
 import com.javamaster.springsecurityjwt.repository.GameObjectEntityRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class GameObjectService {
@@ -47,4 +46,8 @@ public class GameObjectService {
      /*public List<GameObjectEntity> getByAuthor_id(UserEntity user){
         return gameObjectEntityRepository.findAllByAuthor_id(user);
     } */
+// тут на интеджер
+    public ArrayList<Integer> getByPostId(UserEntity user){
+        return gameObjectEntityRepository.getAllByAuthor_id(user);
+    }
 }

@@ -3,12 +3,10 @@ package com.javamaster.springsecurityjwt.service;
 import com.javamaster.springsecurityjwt.entity.CommentEntity;
 import com.javamaster.springsecurityjwt.entity.GameObjectEntity;
 import com.javamaster.springsecurityjwt.repository.CommentEntityRepository;
-import com.javamaster.springsecurityjwt.repository.GameObjectEntityRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Optional;
 
 @Service
 public class CommentService {
@@ -20,16 +18,24 @@ public class CommentService {
         return true;
     }
 
-    public void deleteById(Integer id){
+    /*public void deleteById(Integer id){
         commentEntityRepository.deleteById(id);
     }
 
-    public void deleteAllByPostId(GameObjectEntity gameObject){
-        ArrayList<Integer> list = commentEntityRepository.getAllByPost_id(gameObject);
+    /*public void deleteAllByPostId(GameObjectEntity gameObject){
+        ArrayList<Integer> list =new ArrayList<>();
+        list.add(getByPost_id(gameObject));
         for (Integer id : list )
         {
             deleteById(id);
         }
-    }
+    } */
+    //тут на интеджер
+    /*public CommentEntity getByPost_id(GameObjectEntity gameObject){
+        return commentEntityRepository.getAllByPost_id()
+    } */
 
+    public Optional<CommentEntity> getById(Integer id){
+        return commentEntityRepository.findById(id);
+    }
 }

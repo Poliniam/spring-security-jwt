@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -28,7 +29,11 @@ public interface GameObjectEntityRepository extends JpaRepository <GameObjectEnt
 
     Optional<GameObjectEntity> findById(Integer id);
 
-    //List<GameObjectEntity> findAllByAuthor_id(UserEntity author);
+   @Query("select id from CommentEntity where post_id = :gameObjectEntity")
+    ArrayList<Integer> getAllByPost_id(@Param("gameObjectEntity") GameObjectEntity gameObjectEntity);
 
 
+
+    @Query("select id from GameObjectEntity where author_id = :userEntity")
+    ArrayList<Integer> getAllByAuthor_id(@Param("userEntity") UserEntity userEntity);
 }

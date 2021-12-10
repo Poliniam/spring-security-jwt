@@ -29,6 +29,11 @@ public class UserService {
         return userEntityRepository.save(userEntity);
     }
 
+    public boolean saveUserOnce (UserEntity userEntity){
+        userEntityRepository.save(userEntity);
+        return true;
+    }
+
     public UserEntity findById(int id){
         UserEntity user = userEntityRepository.findById(id);
         return user;
@@ -65,5 +70,9 @@ public class UserService {
         userEntityRepository.save(user);
 
         return true;
+    }
+
+    public UserEntity findByEmail(String email){
+        return userEntityRepository.findByEmail(email);
     }
 }

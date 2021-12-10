@@ -2,6 +2,7 @@ package com.javamaster.springsecurityjwt.controller;
 
 
 import com.javamaster.springsecurityjwt.entity.*;
+import com.javamaster.springsecurityjwt.exceptions.UserException;
 import com.javamaster.springsecurityjwt.service.CommentService;
 import com.javamaster.springsecurityjwt.service.GameObjectService;
 import com.javamaster.springsecurityjwt.service.GameService;
@@ -29,9 +30,11 @@ public class GameObjectController {
 
     private CurrentUser currentUserNow;
 
+    java.util.logging.Logger log = java.util.logging.Logger.getLogger(GameController.class.getName());
+
     //to create new game object
     @PostMapping("/object")
-    public String createGameObject(@RequestBody @Valid NewForm gameObject) {
+    public String createGameObject(@RequestBody @Valid NewForm gameObject) throws UserException {
         if ((CurrentUser.getRoleOfCurrentUser()).equals("ROLE_USER")) {
             Date date = new Date();
             GameObjectEntity gameOb = new GameObjectEntity();
@@ -45,11 +48,11 @@ public class GameObjectController {
                 GameEntity game = (gameService.findByGameName(gameObject.getGameName()));
                 gameOb.setGame_id(game);
                 gameObjectService.saveRequest(gameOb);
-
-                return "OK";
-            } else return "Such request already exists";
+                log.info("New game object added");
+                return "New game object added";
+            } else throw new UserException("Such request already exists");
         }
-        else return "Admin can't add new game object";
+        else throw new UserException("Admin can't add new game object");
     }
 
     //to get all game objects
@@ -70,23 +73,24 @@ public class GameObjectController {
 
     //to delete the game object ( the author has a right for that ) | DELETE /object/:id
    @DeleteMapping("/object/{id}")
-    public String deleteTheGameObject(@PathVariable Integer id){
+    public String deleteTheGameObject(@PathVariable Integer id) throws UserException {
        if ((CurrentUser.getRoleOfCurrentUser()).equals("ROLE_USER")) {
            GameObjectEntity theGameObject = gameObjectService.findById(id);
            if (userService.findById(CurrentUser.getIdOfCurrentUser()).equals(theGameObject.getId())) {
                if (gameObjectService.findById(id) != null) {
-                   commentService.deleteAllByPostId(theGameObject);
+                   //commentService.deleteAllByPostId(theGameObject);
                    gameObjectService.deleteById(id);
+                   log.info("This is removed");
                    return "This is removed";
-               } else return "There is no such game object";
-           } else return "It's not your game object, so you can't delete it";
+               } else throw new UserException ("There is no such game object");
+           } else throw new UserException ("It's not your game object, so you can't delete it");
        }
-       else return "Admin can't do it";
+       else throw new UserException ("Admin can't do it");
     }
 
     //to edit a game object | PUT /object/:id
     @PutMapping("/object/{id}")
-    public String editTheGameObject(@PathVariable String id, @RequestBody @Valid NewForm newGameObject){
+    public String editTheGameObject(@PathVariable String id, @RequestBody @Valid NewForm newGameObject) throws UserException {
         int gameObjectId = Integer.parseInt(id);
         Date date = new Date();
         GameObjectEntity gameObject = new GameObjectEntity();
@@ -102,11 +106,14 @@ public class GameObjectController {
                     gameObject.setText(newGameObject.getText());
                     gameObject.setCreatedAt(presentGameObject.getCreatedAt());
                     gameObject.setStatus(presentGameObject.getStatus());
+                    gameObject.setAuthor_id(presentGameObject.getAuthor_id());
                     gameObjectService.saveRequest(gameObject);
-                    return "OK";
-                } else return "There is no such game object";
-            } else return "It's not your game object, so you can't edit it";
-        } else return "Admin can't do it";
+                    log.info("The game object edited");
+                    return "The game object edited";
+                } else throw new UserException ("There is no such game object");
+            } else throw new UserException ("It's not your game object, so you can't edit it");
+        } else throw new UserException ("Admin can't do it");
+
     }
 
     //to get game objects of an authorised user | GET /my

@@ -10,6 +10,7 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+import javax.validation.constraints.Email;
 
 @Entity
 @Table(name = "user_table")
@@ -39,6 +40,7 @@ public class UserEntity {
     }
 
     @Column
+    @Email
     private String email;
 
     @Column
