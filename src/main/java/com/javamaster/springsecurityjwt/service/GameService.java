@@ -1,14 +1,12 @@
 package com.javamaster.springsecurityjwt.service;
 
 import com.javamaster.springsecurityjwt.entity.GameEntity;
-import com.javamaster.springsecurityjwt.entity.GameObjectEntity;
+import com.javamaster.springsecurityjwt.exceptions.UserException;
 import com.javamaster.springsecurityjwt.repository.GameEntityRepository;
-import com.javamaster.springsecurityjwt.repository.GameObjectEntityRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
-import java.util.List;
 
 @Service
 public class GameService {
@@ -16,18 +14,29 @@ public class GameService {
     @Autowired
     private GameEntityRepository gameEntityRepository;
 
-    public GameEntity findByGameName(String gameName) {
+    public GameEntity findByGameName(String gameName) throws UserException {
         GameEntity gameEntity = gameEntityRepository.findByGameName(gameName);
-        return gameEntity;
+        if(gameEntity != null) {
+            return gameEntity;
+        }
+        else throw new UserException("There is no such game");
     }
 
     public ArrayList<GameEntity> getAll( ) {
         return gameEntityRepository.findAll();
     }
 
-    public boolean saveGame(GameEntity game) {
-        gameEntityRepository.save(game);
-        return true;
+    public boolean saveGame(GameEntity game) throws UserException {
+        if (findByGameName(game.getGameName()) == null) {
+            gameEntityRepository.save(game);
+            return true;
+        }
+     else throw new UserException("That game already exists");
+    }
+
+    public boolean saveUpdatedGame(GameEntity game) throws UserException {
+            gameEntityRepository.save(game);
+            return true;
     }
 
     public GameEntity findById(int id) {

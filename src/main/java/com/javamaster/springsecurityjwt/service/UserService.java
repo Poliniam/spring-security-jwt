@@ -2,6 +2,7 @@ package com.javamaster.springsecurityjwt.service;
 
 import com.javamaster.springsecurityjwt.entity.RoleEntity;
 import com.javamaster.springsecurityjwt.entity.UserEntity;
+import com.javamaster.springsecurityjwt.exceptions.UserException;
 import com.javamaster.springsecurityjwt.repository.RoleEntityRepository;
 import com.javamaster.springsecurityjwt.repository.UserEntityRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,21 +19,26 @@ public class UserService {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
-    public UserEntity saveUser(UserEntity userEntity) {
-        RoleEntity userRole = roleEntityRepository.findByName("ROLE_USER");
-        userEntity.setRoleEntity(userRole);
+    public UserEntity saveUserWithNewPassword(UserEntity userEntity) {
         userEntity.setPassword(passwordEncoder.encode(userEntity.getPassword()));
         return userEntityRepository.save(userEntity);
+    }
+
+    public Boolean saveUser(UserEntity userEntity) throws UserException {
+        if(findByEmail(userEntity.getEmail())==null && findByLogin(userEntity.getLogin())==null) {
+            RoleEntity userRole = roleEntityRepository.findByName("ROLE_USER");
+            userEntity.setRoleEntity(userRole);
+            userEntity.setPassword(passwordEncoder.encode(userEntity.getPassword()));
+             userEntityRepository.save(userEntity);
+             return true;
+        }
+        else throw new UserException("That user already exists");
     }
 
     public UserEntity saveUserOnceMore (UserEntity userEntity){
         return userEntityRepository.save(userEntity);
     }
 
-    public boolean saveUserOnce (UserEntity userEntity){
-        userEntityRepository.save(userEntity);
-        return true;
-    }
 
     public UserEntity findById(int id){
         UserEntity user = userEntityRepository.findById(id);
@@ -56,20 +62,6 @@ public class UserService {
             }
         }
         return null;
-    }
-
-    public boolean activateUser(String code) {
-        UserEntity user = userEntityRepository.findByActivationCode(code);
-
-        if(user == null)
-        {
-            return false;
-        }
-
-        user.setActivationCode(null);
-        userEntityRepository.save(user);
-
-        return true;
     }
 
     public UserEntity findByEmail(String email){

@@ -1,6 +1,7 @@
 package com.javamaster.springsecurityjwt.controller;
 
 import com.javamaster.springsecurityjwt.entity.GameEntity;
+import com.javamaster.springsecurityjwt.exceptions.UserException;
 import com.javamaster.springsecurityjwt.repository.GameEntityRepository;
 import com.javamaster.springsecurityjwt.service.GameService;
 import org.junit.Assert;
@@ -23,7 +24,7 @@ public class RequestControllerTest {
     @MockBean
     private GameEntityRepository gameEntityRepository;
     @Test
-    public void createGame() {
+    public void createGame() throws UserException {
         GameEntity game = new GameEntity();
         game.setId(7);
         boolean isUserCreated = gameService.saveGame(game);
@@ -32,13 +33,19 @@ public class RequestControllerTest {
     }
 
     @Test
-    public void addGameFailTest() {
+    public void addGameFailTest() throws UserException {
         GameEntity game = new GameEntity();
+        Boolean isReqCreated;
         game.setGameName("fifa");
         Mockito.doReturn(new GameEntity())
                 .when(gameEntityRepository)
                 .findByGameName("fifa");
-        Boolean isReqCreated =gameService.saveGame(game);
+        try{
+            gameService.saveGame(game);
+             isReqCreated=true;
+        } catch (Exception e) {
+            isReqCreated=false;
+        }
         Assert.assertFalse(isReqCreated);
         Mockito.verify(gameEntityRepository, Mockito.times(0)).save(ArgumentMatchers.any(GameEntity.class));
 

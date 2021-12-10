@@ -23,13 +23,19 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     protected void configure(HttpSecurity http) throws Exception {
         http
                 .httpBasic().disable()
+                .cors().disable()
                 .csrf().disable()
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and()
                 .authorizeRequests()
-            /*  .antMatchers("/admin/*").hasRole("ADMIN")
-                .antMatchers("/user/*").hasRole("USER")*/
-                .antMatchers("/register", "/auth").permitAll()
+                .antMatchers("/admin/*").hasRole("ADMIN")
+                .antMatchers("/user/*").hasRole("USER")
+                .antMatchers("/register", "/auth", "/articles/{id}/comments",
+                        "/auth/confirm/{hash_code}", "games", "/object", "/object/{id}",
+                        "/users/{id}/comments", "/users/{id}/comments/{idComm}", "/filterByGames", "/rating/{id}",
+                        "/forgetPassword", "/forgetPassword/confirm/{hash_code}", "/newPassword", "/filterByGames/{gameName}"
+
+                        ).permitAll()
                 .and()
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
     }

@@ -61,7 +61,7 @@ public class CommentEntity {
         this.message = message;
     }
 
-    public boolean isApproved() {
+    public Boolean getApproved() {
         return approved;
     }
 
@@ -84,4 +84,6 @@ public class CommentEntity {
     public void setAuthor_id(UserEntity author_id) {
         this.author_id = author_id;
     }
+
+
 }

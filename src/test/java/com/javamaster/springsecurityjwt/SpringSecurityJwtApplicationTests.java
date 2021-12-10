@@ -19,25 +19,40 @@ public class SpringSecurityJwtApplicationTests {
     @Autowired
     private MockMvc mockMvc;
 
-    @Test
-    public void contextLoads() throws Exception {
-        this.mockMvc.perform(get("/register"))
-                .andDo(print())
-                .andExpect(status().isOk());
-    }
-    @Test
-    public void requestsLoads() throws Exception {
-        this.mockMvc.perform(get("/requests"))
-                .andDo(print())
-                .andExpect(status().isOk());
-    }
+
     @Test
     public void accessDeniedTest() throws Exception {
-        this.mockMvc.perform(get("/createRequest"))
+        this.mockMvc.perform(get("/game"))
                 .andDo(print())
                 .andExpect(status().is4xxClientError());
 
     }
+
+    @Test
+    public void contextLoads() throws Exception {
+        this.mockMvc.perform(get("/register"))
+                .andDo(print())
+                .andExpect(status().is4xxClientError());
+    }
+    @Test
+    public void objectsLoads() throws Exception {
+        this.mockMvc.perform(get("/object"))
+                .andDo(print())
+                .andExpect(status().isOk());
+    }
+    @Test
+    public void authenticationLoads() throws Exception {
+        this.mockMvc.perform(get("/auth"))
+                .andDo(print())
+                .andExpect(status().is4xxClientError());
+    }
+    @Test
+    public void requestsLoads() throws Exception {
+        this.mockMvc.perform(get("/games"))
+                .andDo(print())
+                .andExpect(status().isOk());
+    }
+
 
 
 

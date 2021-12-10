@@ -11,6 +11,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.validation.constraints.Email;
+import javax.validation.constraints.Size;
 
 @Entity
 @Table(name = "user_table")
@@ -25,19 +26,8 @@ public class UserEntity {
     private String login;
 
     @Column
+    @Size(min=10)
     private String password;
-
-    public void setActivationCode(String activationCode) {
-        this.activationCode = activationCode;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
 
     @Column
     @Email
@@ -56,5 +46,17 @@ public class UserEntity {
     @ManyToOne
     @JoinColumn(name = "role_id")
     private RoleEntity roleEntity;
+
+    public void setActivationCode(String activationCode) {
+        this.activationCode = activationCode;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
 
 }

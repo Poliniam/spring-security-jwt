@@ -25,10 +25,7 @@ public class GameObjectService {
 
         return gameObjectEntityRepository.findByTitle(title);
     }
-    public void approveById(Integer id) {
 
-        gameObjectEntityRepository.updateById(id);
-    }
     public void deleteById(Integer id) {
 
         gameObjectEntityRepository.deleteById(id);
@@ -39,15 +36,10 @@ public class GameObjectService {
         return true;
     }
     public List<GameObjectEntity> getAll( ) {
-
         return gameObjectEntityRepository.findAll();
     }
 
-     /*public List<GameObjectEntity> getByAuthor_id(UserEntity user){
-        return gameObjectEntityRepository.findAllByAuthor_id(user);
-    } */
-// тут на интеджер
-    public ArrayList<Integer> getByPostId(UserEntity user){
+    public ArrayList<GameObjectEntity> getByPostId(UserEntity user){
         return gameObjectEntityRepository.getAllByAuthor_id(user);
     }
 }

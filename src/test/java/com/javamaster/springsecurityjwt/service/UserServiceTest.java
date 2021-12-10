@@ -35,7 +35,7 @@ public class UserServiceTest {
     public void saveUser() throws UserException {
         UserEntity user = new UserEntity();
         user.setEmail("some@mail.ru");
-        boolean isUserCreated = userService.saveUserOnce(user);
+        boolean isUserCreated = userService.saveUser(user);
         Assert.assertTrue(isUserCreated);
         Mockito.verify(userRepo, Mockito.times(1)).save(user);
 
@@ -47,7 +47,13 @@ public class UserServiceTest {
         Mockito.doReturn(new UserEntity())
                 .when(userRepo)
                 .findByEmail("5");
-        boolean isUserCreated = userService.saveUserOnce(user);
+        boolean isUserCreated;
+        try{
+            userService.saveUser(user);
+            isUserCreated=true;
+        } catch (Exception e) {
+            isUserCreated=false;
+        }
         Assert.assertFalse(isUserCreated);
         Mockito.verify(userRepo, Mockito.times(0)).save(ArgumentMatchers.any(UserEntity.class));
 

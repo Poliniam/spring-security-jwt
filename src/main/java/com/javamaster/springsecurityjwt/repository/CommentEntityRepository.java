@@ -14,12 +14,16 @@ public interface CommentEntityRepository extends JpaRepository<CommentEntity, In
 
     void deleteById(Integer id);
 
-    @Query("select id from CommentEntity where post_id = :gameObjectEntity")
-    ArrayList<Integer> getAllByPost_id(@Param("gameObjectEntity") Integer gameObjectEntity);
+    @Query("select f from CommentEntity f where f.post_id = :gameObjectEntity")
+    ArrayList<CommentEntity> getAllByPost_id(@Param("gameObjectEntity") GameObjectEntity gameObjectEntity);
 
-   Optional<CommentEntity> findById(Integer id);
+    Optional<CommentEntity> findById(Integer id);
+
+    @Query("select f from CommentEntity f")
+    ArrayList<CommentEntity> getAll();
+
+    CommentEntity getById(Integer id);
 
 
-    //CommentEntity getAllByPost_id(GameObjectEntity gameObjectEntity);
 
 }

@@ -29,11 +29,6 @@ public interface GameObjectEntityRepository extends JpaRepository <GameObjectEnt
 
     Optional<GameObjectEntity> findById(Integer id);
 
-   @Query("select id from CommentEntity where post_id = :gameObjectEntity")
-    ArrayList<Integer> getAllByPost_id(@Param("gameObjectEntity") GameObjectEntity gameObjectEntity);
-
-
-
-    @Query("select id from GameObjectEntity where author_id = :userEntity")
-    ArrayList<Integer> getAllByAuthor_id(@Param("userEntity") UserEntity userEntity);
+    @Query("select g from GameObjectEntity g where g.author_id = :userEntity")
+    ArrayList<GameObjectEntity> getAllByAuthor_id(@Param("userEntity") UserEntity userEntity);
 }
