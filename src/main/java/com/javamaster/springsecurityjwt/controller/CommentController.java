@@ -9,13 +9,15 @@ import com.javamaster.springsecurityjwt.service.CommentService;
 import com.javamaster.springsecurityjwt.service.GameObjectService;
 import com.javamaster.springsecurityjwt.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.ModelAndView;
 
 import javax.validation.Valid;
 import java.util.ArrayList;
 import java.util.Date;
 
-@RestController
+@Controller
 public class CommentController {
     @Autowired
     private UserService userService;
@@ -25,8 +27,9 @@ public class CommentController {
     @Autowired
     private CommentService commentService;
 
+    @ResponseBody
     @PostMapping("/articles/{id}/comments")
-    public String createComment(@RequestBody @Valid NewComment newComment, @PathVariable Integer id) throws UserException {
+    public ModelAndView createComment(@Valid NewComment newComment, @PathVariable Integer id) throws UserException {
         Date date = new Date();
         CommentEntity comment = new CommentEntity();
             if(newComment.getMessage()!=null && newComment.getRate()!=null) {
@@ -35,11 +38,12 @@ public class CommentController {
                     comment.setRate(newComment.getRate());
                     comment.setApproved(false);
                     comment.setCreatedAt(date);
-                    UserEntity currentUser = userService.findById(CurrentUser.getIdOfCurrentUser());
                     GameObjectEntity gameObject = (gameObjectService.findById(id));
                     comment.setPost_id(gameObject);
                     commentService.saveComment(comment);
-                    return "OK";
+                    ModelAndView view = new ModelAndView();
+                    view.setViewName("commentSended");
+                    return view;
                 }
                 else throw new UserException("There is no such game object");
             }

@@ -9,16 +9,21 @@ import com.javamaster.springsecurityjwt.exceptions.UserException;
 import com.javamaster.springsecurityjwt.service.MailSender;
 import com.javamaster.springsecurityjwt.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.ModelAndView;
 
 import javax.validation.Valid;
 import java.io.FileInputStream;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.LogManager;
 import java.util.logging.Logger;
 
-@RestController
+@Controller
 public class RegistrationController {
 
     @Autowired
@@ -27,6 +32,8 @@ public class RegistrationController {
     private JwtProvider jwtProvider;
     @Autowired
     private MailSender mailSender;
+    @Autowired
+    private GameObjectController contr;
 
     static Logger LOGGER;
     static {
@@ -39,9 +46,11 @@ public class RegistrationController {
     }
 
     @PostMapping("/register")
-    public String registerUser(@RequestBody @Valid RegistrationRequest registrationRequest) throws UserException {
+    public ModelAndView registerUser(@Valid RegistrationRequest registrationRequest) throws UserException {
         if (registrationRequest.getLogin()!= null && registrationRequest.getPassword()!= null && registrationRequest.getEmail()!= null) {
             if (registrationRequest.getPassword().equals(registrationRequest.getConfirmPassword())) {
+                ModelAndView view = new ModelAndView();
+                view.setViewName("main");
                 UserEntity u = new UserEntity();
                 u.setPassword(registrationRequest.getPassword());
                 u.setLogin(registrationRequest.getLogin());
@@ -55,10 +64,13 @@ public class RegistrationController {
                         u.getLogin(),
                         u.getActivationCode());
 
-                mailSender.send(u.getEmail(), "Activation code", message);
+                //mailSender.send(u.getEmail(), "Activation code", message);
 
+                List list = new ArrayList();
+                list = contr.getAllGameObjects();
+                view.addObject("list", list);
                 LOGGER.log(Level.INFO,"The activation code was sent to user");
-                return "Successful registration! Check you mail we send you activation code";
+                return view;
             }
             else throw new UserException("Password mismatch");
         }
@@ -66,20 +78,21 @@ public class RegistrationController {
     }
 
     @PostMapping("/auth")
-    public AuthResponse auth(@RequestBody AuthRequest request) throws UserException {
+    public ModelAndView auth(AuthRequest request) throws UserException {
         CurrentUser currentUser = new CurrentUser();
         UserEntity userEntity = userService.findByLoginAndPassword(request.getLogin(), request.getPassword());
         if (userEntity != null) {
-            if (userEntity.getStatus().equals(false)) {
-                throw new UserException("Confirm the activation code using the link in your mail");
-            } else {
                 RoleEntity role = userEntity.getRoleEntity();
                 currentUser.setIdOfCurrentUser(userEntity.getId());
                 currentUser.setRoleOfCurrentUser(role.getName());
                 String token = jwtProvider.generateToken(userEntity.getLogin());
                 LOGGER.log(Level.INFO,"The user was authenticated");
-                return new AuthResponse(token);
-            }
+                ModelAndView view = new ModelAndView();
+                view.setViewName("main");
+            List list = new ArrayList();
+            list = contr.getAllGameObjects();
+            view.addObject("list", list);
+                return view;
         }
         else throw new UserException("Wrong password or login");
     }
@@ -94,6 +107,26 @@ public class RegistrationController {
             return "Okay, we can register you. Now, you should do an authorization.";
         }
         else throw new UserException("Incorrect activation code. Register again");
+    }
+
+    @GetMapping("/hello")
+    public ModelAndView activate() throws UserException {
+        ModelAndView view = new ModelAndView();
+        view.setViewName("registration");
+        return view;
+    }
+
+    @GetMapping("/backToMain")
+    public ModelAndView backToMain(){
+        ModelAndView view = new ModelAndView();
+        view.setViewName("main");
+        return view;
+    }
+    @GetMapping("/createGameObject")
+    public ModelAndView createGameObject(){
+        ModelAndView view = new ModelAndView();
+        view.setViewName("gameObject");
+        return view;
     }
 }
 

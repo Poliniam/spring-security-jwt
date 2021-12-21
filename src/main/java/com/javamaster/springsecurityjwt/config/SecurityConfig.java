@@ -13,8 +13,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
-@EnableWebSecurity
-public class SecurityConfig extends WebSecurityConfigurerAdapter {
+@EnableWebSecurity // класс является классом настроек Spring Security
+public class SecurityConfig extends WebSecurityConfigurerAdapter { //данный класс позволяет настроить всю систему секюрити и авторизации под свои нужды.
 
     @Autowired
     private JwtFilter jwtFilter;
@@ -26,6 +26,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .cors().disable()
                 .csrf().disable()
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+        //которая будет управлять сессией юзера в системе спринг секюрити. Так как я буду авторизировать пользователя по токену, мне не нужно создавать и хранить для него сессию. Поэтому я указал STATELESS.
                 .and()
                 .authorizeRequests()
                 .antMatchers("/admin/*").hasRole("ADMIN")
@@ -33,7 +34,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .antMatchers("/register", "/auth", "/articles/{id}/comments",
                         "/auth/confirm/{hash_code}", "games", "/object", "/object/{id}",
                         "/users/{id}/comments", "/users/{id}/comments/{idComm}", "/filterByGames", "/rating/{id}",
-                        "/forgetPassword", "/forgetPassword/confirm/{hash_code}", "/newPassword", "/filterByGames/{gameName}"
+                        "/forgetPassword", "/forgetPassword/confirm/{hash_code}", "/newPassword", "/filterByGames/{gameName}", "/fuser/object"
 
                         ).permitAll()
                 .and()

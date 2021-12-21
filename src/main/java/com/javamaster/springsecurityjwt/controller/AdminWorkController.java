@@ -67,7 +67,5 @@ public class AdminWorkController {
             else throw new UserException("It's already true");
         }
         else throw new UserException("There is no such comment");
-
     }
-
 }
