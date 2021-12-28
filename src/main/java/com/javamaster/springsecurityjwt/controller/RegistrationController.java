@@ -9,6 +9,9 @@ import com.javamaster.springsecurityjwt.exceptions.UserException;
 import com.javamaster.springsecurityjwt.service.MailSender;
 import com.javamaster.springsecurityjwt.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Recover;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -56,16 +59,15 @@ public class RegistrationController {
                 u.setLogin(registrationRequest.getLogin());
                 u.setEmail(registrationRequest.getEmail());
                 u.setActivationCode(UUID.randomUUID().toString());
-                u.setStatus(false);
+                u.setStatus(true);
                 userService.saveUser(u);
+                CurrentUser.setRoleOfCurrentUser("ROLE_USER");
                 String message = String.format(
                         "Hello, %s! \n" +
                                 "Welcome to Trader application. Please, visit next link: http://localhost:8080/auth/confirm/%s",
                         u.getLogin(),
                         u.getActivationCode());
-
                 //mailSender.send(u.getEmail(), "Activation code", message);
-
                 List list = new ArrayList();
                 list = contr.getAllGameObjects();
                 view.addObject("list", list);
@@ -117,15 +119,31 @@ public class RegistrationController {
     }
 
     @GetMapping("/backToMain")
-    public ModelAndView backToMain(){
+    public ModelAndView backToMain() throws UserException {
         ModelAndView view = new ModelAndView();
         view.setViewName("main");
+        List list = new ArrayList();
+        list = contr.getAllGameObjects();
+        view.addObject("list", list);
         return view;
     }
+
     @GetMapping("/createGameObject")
-    public ModelAndView createGameObject(){
+    @Retryable(value = UserException.class, maxAttempts = 3, backoff = @Backoff(delay = 1000))
+    public ModelAndView createGameObject() throws UserException {
+        if(CurrentUser.getRoleOfCurrentUser().equals("ROLE_USER")) {
+            ModelAndView view = new ModelAndView();
+            view.setViewName("gameObject");
+            return view;
+        }
+        else throw new UserException("You are not a trader");
+    }
+
+    @Recover
+    private ModelAndView recoverGameObject(Throwable throwable){
         ModelAndView view = new ModelAndView();
-        view.setViewName("gameObject");
+        view.setViewName("gameObjectError");
+        System.out.println(throwable.getMessage());
         return view;
     }
 }

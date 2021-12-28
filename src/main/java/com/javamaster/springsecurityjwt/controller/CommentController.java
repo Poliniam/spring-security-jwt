@@ -36,7 +36,7 @@ public class CommentController {
                 if (gameObjectService.findById(id) != null && (gameObjectService.findById(id)).getStatus() == true) {
                     comment.setMessage(newComment.getMessage());
                     comment.setRate(newComment.getRate());
-                    comment.setApproved(false);
+                    comment.setApproved(true);
                     comment.setCreatedAt(date);
                     GameObjectEntity gameObject = (gameObjectService.findById(id));
                     comment.setPost_id(gameObject);
@@ -107,11 +107,12 @@ public class CommentController {
     public Integer getTraderRating (@PathVariable Integer id) throws UserException {
         ArrayList<CommentEntity> resultList = getTraderComments(id);
         int sum =0;
+        int result = 0;
         if(resultList.size()!=0) {
             for (CommentEntity comment : resultList) {
                 sum += comment.getRate();
             }
-            int result = sum / resultList.size();
+            result = sum / resultList.size();
             return result;
         }
         else throw new UserException("This trader don't have a rating.");

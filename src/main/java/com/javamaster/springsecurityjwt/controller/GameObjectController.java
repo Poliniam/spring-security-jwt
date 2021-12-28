@@ -7,6 +7,9 @@ import com.javamaster.springsecurityjwt.service.GameObjectService;
 import com.javamaster.springsecurityjwt.service.GameService;
 import com.javamaster.springsecurityjwt.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Recover;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
@@ -31,6 +34,8 @@ public class GameObjectController {
     private CommentService commentService;
     @Autowired
     private UserService userService;
+    @Autowired
+    private CommentController commContr;
     static Logger LOGGER;
 
     static {
@@ -45,30 +50,30 @@ public class GameObjectController {
 
     @PostMapping("/fuser/object")
     public ModelAndView createGameObject(@Valid NewForm gameObject) throws UserException {
-        Date date = new Date();
-        GameObjectEntity gameOb = new GameObjectEntity();
-        if (CurrentUser.getIdOfCurrentUser() != null) {
-            if (gameObject.getGameName() != null && gameObject.getTitle() != null && gameObject.getText() != null) {
-                if (gameObjectService.findByTitle(gameObject.getTitle()) == null) {
-                    gameOb.setTitle(gameObject.getTitle());
-                    gameOb.setText(gameObject.getText());
-                    UserEntity currentUser = userService.findById(CurrentUser.getIdOfCurrentUser());
-                    gameOb.setAuthor_id(currentUser);
-                    gameOb.setStatus(true);
-                    gameOb.setCreatedAt(date);
-                    GameEntity game = (gameService.findByGameName(gameObject.getGameName()));
-                    gameOb.setGame_id(game);
-                    gameObjectService.saveRequest(gameOb);
-                    LOGGER.log(Level.INFO, "New game object added");
-                    ModelAndView view = new ModelAndView();
-                    view.setViewName("main");
-                    List list = new ArrayList();
-                    list = getAllGameObjects();
-                    view.addObject("list", list);
-                    return view;
-                } else throw new UserException("Such game object already exists");
-            } else throw new UserException("Write all data, please");
-        } else throw new UserException("Please do an authentication");
+            Date date = new Date();
+            GameObjectEntity gameOb = new GameObjectEntity();
+            if (CurrentUser.getIdOfCurrentUser() != null) {
+                if (gameObject.getGameName() != null && gameObject.getTitle() != null && gameObject.getText() != null) {
+                    if (gameObjectService.findByTitle(gameObject.getTitle()) == null) {
+                        gameOb.setTitle(gameObject.getTitle());
+                        gameOb.setText(gameObject.getText());
+                        UserEntity currentUser = userService.findById(CurrentUser.getIdOfCurrentUser());
+                        gameOb.setAuthor_id(currentUser);
+                        gameOb.setStatus(false);
+                        gameOb.setCreatedAt(date);
+                        GameEntity game = (gameService.findByGameName(gameObject.getGameName()));
+                        gameOb.setGame_id(game);
+                        gameObjectService.saveRequest(gameOb);
+                        LOGGER.log(Level.INFO, "New game object added");
+                        ModelAndView view = new ModelAndView();
+                        view.setViewName("main");
+                        List list = new ArrayList();
+                        list = getAllGameObjects();
+                        view.addObject("list", list);
+                        return view;
+                    } else throw new UserException("Such game object already exists");
+                } else throw new UserException("Write all data, please");
+            } else throw new UserException("Please do an authentication");
     }
 
     @GetMapping("/object")
@@ -98,39 +103,47 @@ public class GameObjectController {
         } else throw new UserException("There is no such game object");
     }
 
-    @DeleteMapping("/user/object/{id}")
-    public String deleteTheGameObject(@PathVariable Integer id) throws UserException {
+    @PostMapping("/user/object/delete")
+    public ModelAndView deleteTheGameObject(@Valid NewForm gameObject) throws UserException {
         if (CurrentUser.getIdOfCurrentUser() != null) {
-            GameObjectEntity theGameObject = gameObjectService.findById(id);
+            GameObjectEntity theGameObject = gameObjectService.findByTitle(gameObject.getTitle());
             if (theGameObject != null) {
                 if (userService.findById(CurrentUser.getIdOfCurrentUser()).equals(theGameObject.getAuthor_id())) {
                     commentService.deleteAllByPostId(theGameObject);
-                    gameObjectService.deleteById(id);
-                    return "This is removed";
+                    gameObjectService.deleteById(theGameObject.getId());
+                    ModelAndView view = new ModelAndView();
+                    view.setViewName("main");
+                    List list = new ArrayList();
+                    list = getAllGameObjects();
+                    view.addObject("list", list);
+                    return view;
                 } else throw new UserException("It's not your game object, so you can't delete it");
             } else throw new UserException("There is no such game object");
         } else throw new UserException("Please do an authentication");
     }
 
-    @PutMapping("/user/object/{id}")
-    public String editTheGameObject(@PathVariable String id, @RequestBody @Valid NewForm newGameObject) throws UserException {
-        int gameObjectId = Integer.parseInt(id);
+    @PostMapping("/user/object/update")
+    public ModelAndView editTheGameObject(@Valid NewForm newGameObject) throws UserException {
         Date date = new Date();
-        GameObjectEntity gameObject = gameObjectService.findById(gameObjectId);
+        GameObjectEntity gameObject = gameObjectService.findById(newGameObject.getId());
         if (gameObject != null) {
             if (CurrentUser.getIdOfCurrentUser() != null) {
                 if (userService.findById(CurrentUser.getIdOfCurrentUser()).equals(gameObject.getAuthor_id())) {
-                    if (gameObjectService.findById(gameObjectId) != null) {
-                        gameObject.setId(gameObjectId);
+                    if (gameObjectService.findById(newGameObject.getId()) != null) {
+                        gameObject.setId(newGameObject.getId());
                         gameObject.setUpdatedAt(date);
                         GameEntity game = (gameService.findByGameName(newGameObject.getGameName()));
                         gameObject.setGame_id(game);
                         gameObject.setTitle(newGameObject.getTitle());
                         gameObject.setText(newGameObject.getText());
                         gameObjectService.saveRequest(gameObject);
-
                         LOGGER.log(Level.INFO, "The game object edited");
-                        return "The game object edited";
+                        ModelAndView view = new ModelAndView();
+                        view.setViewName("main");
+                        List list = new ArrayList();
+                        list = getAllGameObjects();
+                        view.addObject("list", list);
+                        return view;
                     } else throw new UserException("There is no such game object");
                 } else throw new UserException("It's not your game object, so you can't edit it");
             } else throw new UserException("Please do an authentication");
@@ -171,5 +184,29 @@ public class GameObjectController {
                 return resultList;
             } else throw new UserException("No game objects");
         } else throw new UserException("No such game");
+    }
+
+    @GetMapping("/traderAccount")
+    @Retryable(value = UserException.class, maxAttempts = 3, backoff = @Backoff(delay = 1000))
+    public ModelAndView traderAccount() throws UserException {
+        if(CurrentUser.getRoleOfCurrentUser().equals("ROLE_USER")) {
+            ModelAndView view = new ModelAndView();
+            ArrayList<CommentEntity> commList = new ArrayList<>();
+            commList = commContr.getTraderComments(CurrentUser.getIdOfCurrentUser());
+            Integer rating = commContr.getTraderRating(CurrentUser.getIdOfCurrentUser());
+            view.setViewName("traderAccount");
+            view.addObject("commList", commList);
+            view.addObject("rating", rating);
+            return view;
+        }
+        else throw new UserException("You are not a trader");
+    }
+
+    @Recover
+    private ModelAndView recoverGameObject(Throwable throwable){
+        ModelAndView view = new ModelAndView();
+        view.setViewName("gameObjectError");
+        System.out.println(throwable.getMessage());
+        return view;
     }
 }

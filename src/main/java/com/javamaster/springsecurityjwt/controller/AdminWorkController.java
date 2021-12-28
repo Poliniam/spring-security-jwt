@@ -1,15 +1,20 @@
 package com.javamaster.springsecurityjwt.controller;
 
 import com.javamaster.springsecurityjwt.entity.CommentEntity;
+import com.javamaster.springsecurityjwt.entity.CurrentUser;
 import com.javamaster.springsecurityjwt.entity.GameObjectEntity;
 import com.javamaster.springsecurityjwt.exceptions.UserException;
 import com.javamaster.springsecurityjwt.service.CommentService;
 import com.javamaster.springsecurityjwt.service.GameObjectService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Recover;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.servlet.ModelAndView;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -34,15 +39,20 @@ public class AdminWorkController {
     }
 
     @GetMapping("/admin/objects/{id}")
-    public GameObjectEntity approveTheGameObjects(@PathVariable Integer id) throws UserException {
+    public ModelAndView approveTheGameObjects(@PathVariable Integer id) throws UserException {
             GameObjectEntity gameObject = gameObjectService.findById(id);
+        ModelAndView view = new ModelAndView();
+        List<GameObjectEntity> listOfObjects = new ArrayList<GameObjectEntity>();
+        listOfObjects = getAllGameObjects();
+        view.addObject("list", listOfObjects);
+        view.setViewName("adminAccount");
             if (gameObject == null){
                 throw new UserException("There is no such game object");
             }
             else {
                 gameObject.setStatus(true);
                 gameObjectService.saveRequest(gameObject);
-                return gameObject;
+                return view;
             }
     }
 
@@ -67,5 +77,27 @@ public class AdminWorkController {
             else throw new UserException("It's already true");
         }
         else throw new UserException("There is no such comment");
+    }
+
+    @GetMapping("/adminAccount")
+    @Retryable(value = UserException.class, maxAttempts = 3, backoff = @Backoff(delay = 1000))
+    public ModelAndView adminAccount() throws UserException {
+        if(CurrentUser.getRoleOfCurrentUser().equals("ROLE_ADMIN")) {
+            ModelAndView view = new ModelAndView();
+            List<GameObjectEntity> listOfObjects = new ArrayList<GameObjectEntity>();
+            listOfObjects = getAllGameObjects();
+            view.addObject("list", listOfObjects);
+            view.setViewName("adminAccount");
+            return view;
+        }
+        else throw new UserException("You are not a trader");
+    }
+
+    @Recover
+    private ModelAndView recoverGameObject(Throwable throwable){
+        ModelAndView view = new ModelAndView();
+        view.setViewName("userError");
+        System.out.println(throwable.getMessage());
+        return view;
     }
 }
