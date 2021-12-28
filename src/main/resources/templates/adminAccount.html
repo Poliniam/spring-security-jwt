@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/css/bootstrap.min.css" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/js/bootstrap.min.js"></script>
+<form class="form-horizontal" form id="regForm" th:action="@{/createGameObject}" disabled="disabled"  method="get">
+    <button type="submit" class="btn btn-default">Создать игровой объект</button>
+</form>
+<form class="form-horizontal" form id="regForm" th:action="@{/traderAccount}" disabled="disabled"  method="get">
+    <button type="submit" class="btn btn-default">Аккаунт</button>
+</form>
+<form class="form-horizontal" form id="regForm" th:action="@{/adminAccount}" disabled="disabled"  method="get">
+    <button type="submit" class="btn btn-default">Аккаунт админа</button>
+</form>
+<div class="row">
+    <th:div class="col-lg-4" th:each="gameObject : ${list}">
+        <form class="form-horizontal" form id="regForm" th:action="@{/admin/objects/{id}(id=${gameObject.id})}" disabled="disabled" method="get">
+            <h2 th:text="${gameObject.title}"> </h2>
+            <p th:text="${gameObject.text}"></p>
+            <p>Создано:</p>
+            <p th:text="${gameObject.createdAt}"></p>
+            <p>Обновлено:</p>
+            <p th:text="${gameObject.updatedAt}"></p>
+            <p>Автор:</p>
+            <p th:text="${gameObject.author_id.login}"></p>
+            <p>Игра:</p>
+            <p th:text="${gameObject.game_id.gameName}"></p>
+            <p>Подтверждено ли :</p>
+            <p th:text="${gameObject.status}"></p>
+            <button type="submit" class="btn btn-default">Разрешить игровой объект</button>
+        </form>
+    </th:div>
+    </form>
+</div>
+</body>
+</html>
